@@ -3,14 +3,19 @@ import { getCardImage } from "../utils";
 
 interface CardItemProps {
   card: Card;
+  onSelect: (card: Card) => void;
 }
 
-export function CardItem({ card }: CardItemProps) {
+export function CardItem({ card, onSelect }: CardItemProps) {
   const image = getCardImage(card);
 
   return (
-    <div className="group overflow-hidden rounded-xl bg-slate-800 shadow-md
-                    transition hover:-translate-y-1 hover:shadow-xl">
+    <button
+      onClick={() => onSelect(card)}
+      className="group block overflow-hidden rounded-xl bg-slate-800 text-left
+                 shadow-md transition hover:-translate-y-1 hover:shadow-xl
+                 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+    >
       {image ? (
         <img
           src={image}
@@ -24,6 +29,6 @@ export function CardItem({ card }: CardItemProps) {
           {card.name}
         </div>
       )}
-    </div>
+    </button>
   );
 }

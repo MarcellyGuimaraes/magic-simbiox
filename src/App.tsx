@@ -1,13 +1,16 @@
 import { useState } from "react";
 import { SearchBar } from "./components/SearchBar";
 import { CardGrid } from "./components/CardGrid";
+import { CardDetails } from "./components/CardDetails";
 import { LoadingState } from "./components/states/LoadingState";
 import { EmptyState } from "./components/states/EmptyState";
 import { ErrorState } from "./components/states/ErrorState";
 import { useCardSearch } from "./hooks/useCardSearch";
+import type { Card } from "./types";
 
 export default function App() {
   const [query, setQuery] = useState("");
+  const [selectedCard, setSelectedCard] = useState<Card | null>(null);
   const { cards, status, retry } = useCardSearch(query);
 
   return (
@@ -24,8 +27,12 @@ export default function App() {
         {status === "success" && cards.length === 0 && (
           <EmptyState variant="no-results" query={query} />
         )}
-        {status === "success" && cards.length > 0 && <CardGrid cards={cards} />}
+        {status === "success" && cards.length > 0 && (
+          <CardGrid cards={cards} onSelect={setSelectedCard} />
+        )}
       </main>
+
+      <CardDetails card={selectedCard} onClose={() => setSelectedCard(null)} />
     </div>
   );
 }
