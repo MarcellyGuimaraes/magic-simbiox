@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { searchCards } from "../api/scryfall";
 import { useDebounce } from "./useDebounce";
 import type { Card } from "../types";
@@ -10,34 +10,55 @@ export function useCardSearch(query: string) {
   const [cards, setCards] = useState<Card[]>([]);
   const [status, setStatus] = useState<Status>("idle");
 
-  useEffect(() => {
-    const q = debouncedQuery.trim();
+  const runSearch = useCallback((q: string) => {
+    const term = q.trim();
 
-    // Sem busca ainda: estado inicial, não dispara request.
-    if (!q) {
+    if (!term) {
       setCards([]);
       setStatus("idle");
       return;
     }
 
-    let active = true; // guarda contra respostas fora de ordem
     setStatus("loading");
-
-    searchCards(q)
+    searchCards(term)
       .then((result) => {
-        if (!active) return;
         setCards(result);
         setStatus("success");
       })
+      .catch(() => setStatus("error"));
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    const term = debouncedQuery.trim();
+
+    if (!term) {
+      setCards([]);
+      setStatus("idle");
+      return;
+    }
+
+    setStatus("loading");
+    searchCards(term)
+      .then((result) => {
+        if (active) {
+          setCards(result);
+          setStatus("success");
+        }
+      })
       .catch(() => {
-        if (!active) return;
-        setStatus("error");
+        if (active) setStatus("error");
       });
 
     return () => {
-      active = false; // ignora a resposta se o termo mudou nesse meio-tempo
+      active = false;
     };
   }, [debouncedQuery]);
 
-  return { cards, status };
+  const retry = useCallback(
+    () => runSearch(debouncedQuery),
+    [runSearch, debouncedQuery]
+  );
+
+  return { cards, status, retry };
 }
