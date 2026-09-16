@@ -9,7 +9,7 @@ interface CardGridProps {
 export function CardGrid({ cards, onSelect }: CardGridProps) {
   return (
     <div
-      className="grid gap-4"
+      className="animate-fade-in grid gap-4 sm:gap-5"
       style={{ gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))" }}
     >
       {cards.map((card) => (

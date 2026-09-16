@@ -1,1 +1,149 @@
 @import "tailwindcss";
+
+/* ------------------------------------------------------------------ *
+ * "Compêndio arcano" — tema escuro e quente, tinta + ouro velho,
+ * com as cinco cores de Magic como sistema real. Nada de neon.
+ * Tokens expostos ao Tailwind via @theme (bg-parchment, text-gold…).
+ * ------------------------------------------------------------------ */
+@theme {
+  --color-ink: #0b0906;
+  --color-base: #100d09;
+  --color-panel: #1a150e;
+  --color-panel-2: #221b12;
+  --color-rule: #33291b;
+  --color-rule-soft: #241d13;
+
+  --color-parchment: #ece1cb;
+  --color-quill: #b8a988;
+  --color-quill-dim: #8a7b5f;
+
+  --color-gold: #c8a24a;
+  --color-gold-soft: #e0c274;
+  --color-gold-dim: #8a6f34;
+
+  --font-display: "Cinzel", serif;
+  --font-sans: "Spectral", Georgia, serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--color-parchment);
+  background-color: var(--color-base);
+  /* Névoa arcana sutil no topo — quente, não azulada */
+  background-image:
+    radial-gradient(
+      70rem 45rem at 50% -18rem,
+      rgba(200, 162, 74, 0.1),
+      transparent 60%
+    ),
+    radial-gradient(
+      50rem 40rem at 12% 0%,
+      rgba(120, 60, 30, 0.08),
+      transparent 55%
+    );
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: rgba(200, 162, 74, 0.28);
+  color: #fff;
+}
+
+/* Textura de pergaminho — ruído sutil aplicado onde faz sentido (modal) */
+.parchment {
+  position: relative;
+}
+.parchment::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: screen;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Scrollbar discreta, no tom da madeira/tinta */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-rule) transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--color-rule);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gold-dim);
+  background-clip: content-box;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+/* Pequeno versalete dourado — rótulos de seção estilo manuscrito */
+.eyebrow {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  font-size: 0.7rem;
+  color: var(--color-gold);
+}
+
+/* ---------------------------- Animações --------------------------- */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes pop-in {
+  0% { opacity: 0; transform: translateY(14px) scale(0.97); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}
+
+.animate-fade-in { animation: fade-in 0.25s ease-out both; }
+.animate-pop-in { animation: pop-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+/* Skeleton com brilho passando */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-panel);
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(200, 162, 74, 0.06),
+    transparent
+  );
+  animation: shimmer 1.6s infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  .skeleton::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  html { scroll-behavior: auto; }
+}

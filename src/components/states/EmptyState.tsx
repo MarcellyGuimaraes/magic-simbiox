@@ -1,26 +1,41 @@
+import { Diamond } from "../Ornament";
+
 interface EmptyStateProps {
-    variant: "initial" | "no-results";
-    query?: string;
-  }
-  
-  export function EmptyState({ variant, query }: EmptyStateProps) {
-    const content =
-      variant === "initial"
-        ? {
-            title: "Explore cartas de Magic",
-            message: 'Comece buscando pelo nome de uma carta, como "Black Lotus".',
-          }
-        : {
-            title: "Nenhuma carta encontrada",
-            message: query
-              ? `Não achamos nada para "${query}". Tente outro termo.`
-              : "Tente ajustar sua busca.",
-          };
-  
-    return (
-      <div className="flex flex-col items-center justify-center py-20 text-center">
-        <p className="mb-2 text-lg font-medium text-slate-200">{content.title}</p>
-        <p className="max-w-sm text-slate-400">{content.message}</p>
+  variant: "initial" | "no-results" | "no-color";
+  query?: string;
+}
+
+export function EmptyState({ variant, query }: EmptyStateProps) {
+  const content =
+    variant === "initial"
+      ? {
+          title: "O compêndio aguarda",
+          message:
+            'Busque pelo nome de uma carta — como "Black Lotus" — para começar a explorar.',
+        }
+      : variant === "no-color"
+      ? {
+          title: "Nada nessas cores",
+          message: "Nenhuma das cartas atuais bate com o filtro de cor. Ajuste a seleção.",
+        }
+      : {
+          title: "Nenhuma carta encontrada",
+          message: query
+            ? `Não achamos nada para "${query}". Tente outro termo.`
+            : "Tente ajustar sua busca.",
+        };
+
+  return (
+    <div className="animate-fade-in flex flex-col items-center justify-center py-20 text-center">
+      <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-full border border-gold-dim/40 text-gold">
+        <Diamond className="h-4 w-4" />
       </div>
-    );
-  }
+      <p className="mb-2 font-display text-xl font-semibold text-parchment">
+        {content.title}
+      </p>
+      <p className="max-w-sm text-sm leading-relaxed text-quill">
+        {content.message}
+      </p>
+    </div>
+  );
+}

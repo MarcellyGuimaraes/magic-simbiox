@@ -9,36 +9,25 @@ export function useCardSearch(query: string) {
   const debouncedQuery = useDebounce(query);
   const [cards, setCards] = useState<Card[]>([]);
   const [status, setStatus] = useState<Status>("idle");
-
-  const runSearch = useCallback((q: string) => {
-    const term = q.trim();
-
-    if (!term) {
-      setCards([]);
-      setStatus("idle");
-      return;
-    }
-
-    setStatus("loading");
-    searchCards(term)
-      .then((result) => {
-        setCards(result);
-        setStatus("success");
-      })
-      .catch(() => setStatus("error"));
-  }, []);
+  // Incrementado pelo retry para re-disparar o efeito com o mesmo termo.
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
-    let active = true;
     const term = debouncedQuery.trim();
 
+    /* As transições idle/loading são síncronas de propósito: refletem, na hora,
+       a mudança do termo de busca. Os resultados chegam nos callbacks async. */
+    /* eslint-disable react-hooks/set-state-in-effect */
     if (!term) {
       setCards([]);
       setStatus("idle");
       return;
     }
 
+    let active = true;
     setStatus("loading");
+    /* eslint-enable react-hooks/set-state-in-effect */
+
     searchCards(term)
       .then((result) => {
         if (active) {
@@ -51,14 +40,11 @@ export function useCardSearch(query: string) {
       });
 
     return () => {
-      active = false;
+      active = false; // ignora respostas de buscas já substituídas
     };
-  }, [debouncedQuery]);
+  }, [debouncedQuery, attempt]);
 
-  const retry = useCallback(
-    () => runSearch(debouncedQuery),
-    [runSearch, debouncedQuery]
-  );
+  const retry = useCallback(() => setAttempt((a) => a + 1), []);
 
   return { cards, status, retry };
 }

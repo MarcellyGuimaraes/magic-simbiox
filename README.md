@@ -6,24 +6,37 @@ Aplicação web para busca e exploração de cartas de *Magic: The Gathering*, c
 
 ## Demonstração
 
-<!-- Substitua pela sua imagem ou GIF. Sugestão: grave um GIF curto mostrando
-     uma busca, o carregamento e a abertura do modal de detalhe.
-     Coloque o arquivo em uma pasta /docs e referencie aqui: -->
+🔗 **Demo ao vivo:** _(adicione aqui a URL da Vercel após o deploy)_
 
-![Card Explorer](docs/preview.png)
+<!-- Opcional: adicione um screenshot ou GIF em docs/ e referencie aqui, ex.:
+     ![Card Explorer](docs/preview.png) -->
 
 ## Funcionalidades
 
 - **Busca de cartas** pelo nome, com resposta conforme o usuário digita.
+- **Vitrine de destaques** na tela inicial, para receber quem chega sem um termo em mente.
+- **Filtro pelas cinco cores de mana** (branco, azul, preto, vermelho, verde e incolor), aplicável tanto aos destaques quanto aos resultados.
+- **Sugestões de busca** e **atalho de teclado `/`** para focar o campo — reduzem o atrito de começar.
+- **Contagem de resultados** exibida acima da grade.
 - **Grade responsiva** que ajusta o número de colunas à largura da tela.
 - **Detalhe da carta** em modal, com imagem, custo de mana, tipo, texto de regras, raridade, coleção e preço.
+- **Símbolos de mana** renderizados como pips coloridos (no espírito das cartas de Magic), na grade e no detalhe.
 - **Tratamento completo dos estados de uso**: inicial, carregando, sem resultados e erro.
+
+## Design e experiência
+
+A interface tem o conceito de um **compêndio arcano**: tema escuro e quente (tinta e ouro velho), tipografia serifada — *display* (Cinzel) nos títulos e *Spectral* no corpo — e ornamentos discretos (fleurões, cantoneiras, textura de pergaminho no modal). O objetivo foi fugir do visual "template padrão" e construir uma identidade própria, temática, mas sóbria.
+
+- **Layout editorial**: cabeçalho à esquerda (marca + busca), sem *hero* genérica; a busca fica fixa no topo e acessível a qualquer momento.
+- **As cinco cores como sistema**: a identidade de cor de Magic vira um recurso real de navegação (filtro) e aparece de forma consistente nos pips de mana e no detalhe.
+- **Microinterações discretas**: elevação no *hover* das cartas, entrada em cascata da grade e transições suaves do modal — sempre respeitando `prefers-reduced-motion`.
+- **Detalhes de domínio**: raridade como "selo" (do bronze fosco ao dourado mítico) e custo de mana em pips, aproximando a UI da linguagem visual das cartas.
 
 ## Tecnologias
 
 - **React 19** + **TypeScript**
 - **Vite** (build e dev server)
-- **Tailwind CSS 4** (estilização, via plugin oficial do Vite)
+- **Tailwind CSS 4** (estilização e design tokens, via plugin oficial do Vite)
 - **ESLint** (padronização do código)
 
 Nenhuma biblioteca adicional de UI ou de data-fetching foi utilizada. A decisão foi manter o projeto enxuto e demonstrar o tratamento de dados e estados diretamente, dada a escala do desafio.
@@ -71,19 +84,27 @@ src/
 ├── api/
 │   └── scryfall.ts        # Cliente HTTP e funções da API do Scryfall
 ├── components/
-│   ├── SearchBar.tsx      # Campo de busca
+│   ├── SearchBar.tsx      # Campo de busca (ícone, limpar, atalho "/")
 │   ├── CardGrid.tsx       # Grade responsiva de cartas
 │   ├── CardItem.tsx       # Carta individual (clicável)
 │   ├── CardDetails.tsx    # Modal de detalhe da carta
+│   ├── ColorFilter.tsx    # Filtro pelas cinco cores de mana
+│   ├── Pagination.tsx     # Navegação entre páginas de resultados
+│   ├── ManaCost.tsx       # Custo de mana com ícones oficiais da Scryfall
+│   ├── OracleText.tsx     # Texto de regras com símbolos inline
+│   ├── RarityBadge.tsx    # Selo de raridade
+│   ├── Ornament.tsx       # Ornamentos (fleurão, losango, cantoneira)
 │   └── states/
 │       ├── LoadingState.tsx  # Skeletons durante o carregamento
 │       ├── EmptyState.tsx    # Estado inicial e "nenhum resultado"
 │       └── ErrorState.tsx    # Erro com opção de tentar novamente
 ├── hooks/
-│   ├── useCardSearch.ts   # Lógica de busca, estados e retry
-│   └── useDebounce.ts     # Debounce genérico do termo de busca
+│   ├── useCardSearch.ts     # Lógica de busca, estados e retry
+│   ├── useFeaturedCards.ts  # Cartas em destaque da tela inicial
+│   └── useDebounce.ts       # Debounce genérico do termo de busca
+├── index.css              # Tokens de tema, tipografia e animações
 ├── types.ts               # Tipagem das cartas
-├── utils.ts               # Utilitários (ex: resolução de imagem)
+├── utils.ts               # Utilitários (imagem, parse de mana, cores)
 └── App.tsx                # Composição da interface
 ```
 
@@ -120,6 +141,12 @@ Alguns pontos que foram tratados com atenção por refletirem situações reais 
 
 - **Carregamento com skeletons.** Durante a busca, são exibidos skeletons no mesmo formato das cartas, o que suaviza a espera e evita que o layout "salte" quando os resultados chegam.
 
+- **Imagens no tamanho certo.** A grade usa a versão `small` da imagem (fornecida pela Scryfall), muito mais leve que a `normal` — o que acelera bastante o carregamento de listas grandes. A `normal`, de maior resolução, fica reservada para o modal de detalhe. Cada imagem entra com um *fade* no momento em que termina de carregar (`onLoad`), ligado ao dado real em vez de a um atraso artificial.
+
+- **Símbolos de mana oficiais.** Em vez de recriar os pips, o custo de mana usa os ícones SVG que a própria Scryfall disponibiliza (`svgs.scryfall.io/card-symbols/…`). O custo é parseado (`{2}{W}{U}` → `2`, `W`, `U`) e cada símbolo vira o ícone correspondente — inclusive híbridos —, garantindo fidelidade visual sem manutenção de assets. O mesmo vale para o **texto de regras**: tokens como `{W}` ou `{T}` no meio da frase são substituídos pelos ícones inline, em vez de aparecerem entre chaves.
+
+- **Exibição paginada.** Os resultados são exibidos em páginas de 24 cartas. Como a Scryfall já devolve até 175 cartas por requisição, o gargalo é de renderização (cada carta é uma imagem) — paginar mantém o DOM leve e a navegação fluida mesmo em buscas grandes. A troca de página rola suavemente para o topo dos resultados.
+
 ## Cabeçalhos da API
 
 Todas as requisições incluem o header `Accept`, conforme recomendado pela documentação do Scryfall para evitar bloqueio ou throttling do tráfego.
@@ -128,8 +155,7 @@ Todas as requisições incluem o header `Accept`, conforme recomendado pela docu
 
 Com mais tempo, os próximos passos seriam:
 
-- **Vitrine na tela inicial**: exibir uma seleção de cartas em destaque antes da primeira busca, tornando a entrada da aplicação mais convidativa.
-- **Paginação / scroll infinito** para buscas com muitos resultados.
-- **Filtros** por cor, tipo ou raridade.
+- **Paginação no servidor** (via `next_page` da Scryfall) para navegar além das 175 cartas da primeira resposta — hoje a paginação é só de exibição, sobre o que já veio.
+- **Mais filtros** (tipo e raridade) e busca no servidor por cor, complementando o filtro de cor atual, que atua sobre a página de resultados já carregada.
 - **Cache dos termos já buscados**, para que voltar a uma busca anterior não custe nova requisição.
 - **Testes automatizados** para os hooks e o cliente da API.
