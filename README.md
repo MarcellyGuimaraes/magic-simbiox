@@ -6,10 +6,26 @@ Aplicação web para busca e exploração de cartas de *Magic: The Gathering*, c
 
 ## Demonstração
 
-🔗 **Demo ao vivo:** _(adicione aqui a URL da Vercel após o deploy)_
+🔗 **Demo ao vivo:** **https://magic-simbiox.vercel.app/**
 
-<!-- Opcional: adicione um screenshot ou GIF em docs/ e referencie aqui, ex.:
-     ![Card Explorer](docs/preview.png) -->
+![Card Explorer — vitrine de cartas em destaque](docs/01-home.jpg)
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/02-busca.jpg" alt="Resultados de busca por 'dragon'"></td>
+    <td width="50%"><img src="docs/03-detalhe.jpg" alt="Modal de detalhe da carta"></td>
+  </tr>
+  <tr>
+    <td align="center"><em>Busca com contagem de resultados e filtro por cor</em></td>
+    <td align="center"><em>Detalhe da carta em modal, com símbolos de mana</em></td>
+  </tr>
+</table>
+
+<p align="center">
+  <img src="docs/04-mobile.jpg" alt="Layout responsivo em telas estreitas" width="320">
+  <br>
+  <em>Grade responsiva em telas estreitas</em>
+</p>
 
 ## Funcionalidades
 
